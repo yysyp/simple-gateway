@@ -1,0 +1,60 @@
+server:
+  ssl:
+    key-store-type: PKCS12
+    key-store: classpath:keys/simpledemo.p12
+    key-store-password: simpledemo.sp
+    key-alias: simpledemo
+    enabled: false #Here to turn on/off https
+  port: 8001
+  tomcat:
+    uri-encoding: UTF-8
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    propagation:
+      type: w3c
+      consume: w3c
+      produce: w3c
+    enabled: true
+    baggage:
+      correlation:
+        enabled: true
+      remote-fields: traceId,spanId,traceparent,tracestate
+
+spring:
+  application:
+    name: simple-gateway
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  profiles:
+    active: dev
+  cloud:
+    config:
+      enabled: false
+      discovery:
+        enabled: false
+    kubernetes:
+      enabled: false
+    gateway:
+      routes:
+        - id: my_service_route
+          uri: http://localhost:8080/
+          predicates:
+            - Path=/** #
+          filters:
+            - AddRequestHeader=X-Request-Foo, bar #
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
