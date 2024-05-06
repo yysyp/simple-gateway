@@ -1,6 +1,8 @@
 package ps.demo.config;
 
 
+import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +30,14 @@ public class TraceContextGlobalFilter implements GlobalFilter, Ordered {
     @Autowired
     Tracer tracer;
 
+    @Autowired
+    private RateLimiterRegistry rateLimiterRegistry;
+
+    @io.github.resilience4j.ratelimiter.annotation.RateLimiter(name="backendA")
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        //rateLimiterRegistry.rateLimiter("backendA");
+
         ServerHttpRequest request = exchange.getRequest();
         log.info("test log===>>1...");
         String traceparentHeader = exchange.getRequest().getHeaders().getFirst("traceparent");

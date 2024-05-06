@@ -47,7 +47,7 @@ spring:
     gateway:
       routes:
         - id: my_service_route
-          uri: http://localhost:8080/
+          uri: http://localhost:18888/ #try http://localhost:8001/api/mongo/higet?par=v123 will goto: http://localhost:18888/api/mongo/higet?par=v123
           predicates:
             - Path=/** #
           filters:
@@ -58,3 +58,31 @@ spring:
   config:
     activate:
       on-profile: dev
+
+resilience4j.ratelimiter:
+  configs:
+    default:
+      registerHealthIndicator: true
+      limitForPeriod: 1 #The number of permissions available during one limit refresh period
+      limitRefreshPeriod: 1s #The period of a limit refresh. After each period the rate limiter sets its permissions count back to the limitForPeriod value
+      timeoutDuration: 0 #The default wait time a thread waits for a permission
+      eventConsumerBufferSize: 100
+  instances:
+    backendA:
+      baseConfig: default
+    backendB:
+      limitForPeriod: 6
+      limitRefreshPeriod: 500ms
+      timeoutDuration: 3s
+
+resilience4j.timelimiter:
+  configs:
+    default:
+      cancelRunningFuture: false
+      timeoutDuration: 2s
+  instances:
+    backendA:
+      baseConfig: default
+    backendB:
+      baseConfig: default
+
